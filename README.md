@@ -4,7 +4,7 @@ Inspired by [cantonbecker/bitcoinpaperwallet's](https://github.com/cantonbecker/
 
 ![Sample Do Not Send Funds Here](holiday_pw_sample.png)
 
-As of writing this only bitcoin with holiday template is supported. The script takes a single parameter, the number of wallets you want to create with random seeds.
+As of writing this only bitcoin using BIP84 standard with holiday template is supported. The script takes a single parameter, the number of wallets you want to create with random seeds.
 
 If 0 is passed in, then it creates a single test wallet.
 
@@ -34,7 +34,7 @@ PAPER_WALLET_FRONT_PNG="./template/holiday_paper_wallet_front.png"
 PASSPHRASE=""
 FILEBASE="./deploy/holiday_pw_"
 IMGFONT="%LOCALAPPDATA%\Microsoft\Windows\Fonts\LexendDeca-Regular.ttf"
-BIP44_PATH="m/84'/0'/0'/0"
+BIP32_BIP43_PATH="m/84'/0'/0'/0"
 TEST_ENTROPY_BYTES="00000000000000000000000000000001"
 ```
 
