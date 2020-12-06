@@ -10,12 +10,15 @@ If 0 is passed in, then it creates a single test wallet.
 
 ### Getting Set Up
 
-On Windows:
+#### Windows OS
+
+Clone repo:
 ```
-git clone
-cd
+git clone https://github.com/eccentricbiped/crypto-pwgenerator.git
+cd crypto-pwgenerator
 ```
 
+Activate virtualenv and installing package requirements:
 ```
 py -m venv env
 .\env\Scripts\activate
