@@ -32,7 +32,8 @@ pip install -r requirements.txt
 ```
 PAPER_WALLET_FRONT_PNG="./template/holiday_paper_wallet_front.png"
 PASSPHRASE=""
-FILEBASE="./deploy/holiday_pw_"
+FILEBASE_PNG="./deploy/png/holiday_pw_"
+FILEBASE_PDF="./deploy/pdf/holiday_pw_"
 IMGFONT="%LOCALAPPDATA%\Microsoft\Windows\Fonts\LexendDeca-Regular.ttf"
 BIP32_BIP43_PATH="m/84'/0'/0'/0"
 TEST_ENTROPY_BYTES="00000000000000000000000000000001"
