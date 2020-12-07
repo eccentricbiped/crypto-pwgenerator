@@ -6,6 +6,7 @@ import binascii
 import os
 import sys
 import time
+from reportlab.pdfgen.canvas import Canvas, PDFTextObject
 
 load_dotenv()
 
@@ -24,13 +25,68 @@ def create_paper_wallet(coin_type, base_img_path:str, num_wallets:int, in_passph
 
         else:
 
-            for n in range(0,num_wallets):
-                bip_gen_mnemonic: str = Bip39MnemonicGenerator.FromWordsNumber(12)
-                create_and_deploy_bitcoin_wallet(base_img_path, bip_gen_mnemonic, in_passphrase, in_path, deploy_path_base, n)
+            pdf_props:list = [ (5, 450), (5, 100) ]
+
+
+            # Generate front-side wallets
+            n:int = 0
+            pdf_number:int = 0
+            while n < num_wallets: #for n in range(0,num_wallets):
+
+                img_paths: list = []
+
+                for i in range(0, 2):
+                    if n + i < num_wallets:
+                        bip_gen_mnemonic: str = Bip39MnemonicGenerator.FromWordsNumber(12)
+                        img_path = create_and_deploy_bitcoin_wallet(base_img_path, bip_gen_mnemonic, in_passphrase, in_path, deploy_path_base, n+i)
+                        img_paths.append(img_path)
+                    else:
+                        break
+
+                # Export to pdf
+                pdf_path = os.getenv("FILEBASE_PDF") + deploy_path_base + "_" + str(pdf_number) + ".pdf"
+                canvas = Canvas(pdf_path, pagesize=(612.0, 792.0))
+
+                for i in range(0, len(img_paths)):
+                    canvas.drawImage(img_paths[i], pdf_props[i][0], pdf_props[i][1], 600, 200)
+
+                canvas.save()
+
+                pdf_number += 1
+                n += 2
+
+            # Generate wallet back pdf
+            pdf_path = os.getenv("FILEBASE_PDF") + "_back.pdf"
+            canvas = Canvas(pdf_path, pagesize=(612.0, 792.0))
+            pdf_back_text_pos: list = [(172, 545), (172, 195)] # need to tweak these based on num of characters since there's no obvious way to set center alignment
+
+            # we know some glyphs are missing, suppress warnings
+            import reportlab.rl_config
+            reportlab.rl_config.warnOnMissingFontGlyphs = 0
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            pdfmetrics.registerFont(TTFont('Impact', 'impact.ttf'))
+
+            for i in range(0, 2):
+                canvas.drawImage("./template/holiday_paper_wallet_back.png", pdf_props[i][0], pdf_props[i][1], 600, 200)
+
+                text_obj:PDFTextObject = canvas.beginText()
+                text_obj.setTextOrigin(pdf_back_text_pos[i][0], pdf_back_text_pos[i][1])
+                text_obj.setFont("Impact", 14)
+                text_obj.textOut("100,000")
+                canvas.drawText(text_obj)
+
+            canvas.save()
 
 
 
-def create_and_deploy_bitcoin_wallet(base_img_path, bip_gen_mnemonic, in_passphrase, in_path, deploy_path_base, n=0):
+
+
+
+
+
+
+def create_and_deploy_bitcoin_wallet(base_img_path, bip_gen_mnemonic, in_passphrase, in_path, deploy_path_base, n=0) -> str:
 
     # Generate seed from in_passphrase
     seed_bytes = Bip39SeedGenerator(bip_gen_mnemonic).Generate(in_passphrase)
@@ -73,7 +129,11 @@ def create_and_deploy_bitcoin_wallet(base_img_path, bip_gen_mnemonic, in_passphr
                    stroke_width=5, align="left")
 
     # Export image to deploy folder
-    base_img.save(os.getenv("FILEBASE") + deploy_path_base + '_' + str(n) + ".png")
+    result_img_path = os.getenv("FILEBASE_PNG") + deploy_path_base + '_' + str(n) + ".png"
+    base_img.save(result_img_path)
+
+    return result_img_path
+
 
 def main():
 
