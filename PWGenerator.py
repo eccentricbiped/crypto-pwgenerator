@@ -10,7 +10,7 @@ from reportlab.pdfgen.canvas import Canvas, PDFTextObject
 
 load_dotenv()
 
-def create_paper_wallet(coin_type, base_img_path:str, num_wallets:int, in_passphrase:str, in_path:str, is_test:bool = False):
+def create_paper_wallet(coin_type, base_img_path_front:str, base_img_path_back:str, num_wallets:int, in_passphrase:str, in_path:str, is_test:bool = False):
 
 
     if coin_type == Bip44Coins.BITCOIN:
@@ -21,7 +21,7 @@ def create_paper_wallet(coin_type, base_img_path:str, num_wallets:int, in_passph
 
             entropy_bytes_hex = str.encode(os.getenv("TEST_ENTROPY_BYTES"))
             entropy_mnemonic = Bip39MnemonicGenerator.FromEntropy(binascii.unhexlify(entropy_bytes_hex))
-            create_and_deploy_bitcoin_wallet(base_img_path, entropy_mnemonic, in_passphrase, in_path, deploy_path_base)
+            create_and_deploy_bitcoin_wallet(base_img_path_front, entropy_mnemonic, in_passphrase, in_path, deploy_path_base)
 
         else:
 
@@ -38,7 +38,7 @@ def create_paper_wallet(coin_type, base_img_path:str, num_wallets:int, in_passph
                 for i in range(0, 2):
                     if n + i < num_wallets:
                         bip_gen_mnemonic: str = Bip39MnemonicGenerator.FromWordsNumber(12)
-                        img_path = create_and_deploy_bitcoin_wallet(base_img_path, bip_gen_mnemonic, in_passphrase, in_path, deploy_path_base, n+i)
+                        img_path = create_and_deploy_bitcoin_wallet(base_img_path_front, bip_gen_mnemonic, in_passphrase, in_path, deploy_path_base, n+i)
                         img_paths.append(img_path)
                     else:
                         break
@@ -67,13 +67,15 @@ def create_paper_wallet(coin_type, base_img_path:str, num_wallets:int, in_passph
             from reportlab.pdfbase.ttfonts import TTFont
             pdfmetrics.registerFont(TTFont('Impact', 'impact.ttf'))
 
+
+
             for i in range(0, 2):
-                canvas.drawImage("./template/holiday_paper_wallet_back.png", pdf_props[i][0], pdf_props[i][1], 600, 200)
+                canvas.drawImage(base_img_path_back, pdf_props[i][0], pdf_props[i][1], 600, 200)
 
                 text_obj:PDFTextObject = canvas.beginText()
                 text_obj.setTextOrigin(pdf_back_text_pos[i][0], pdf_back_text_pos[i][1])
-                text_obj.setFont("Impact", 14)
-                text_obj.textOut("100,000")
+                text_obj.setFont("Impact", 11)
+                text_obj.textOut(os.getenv("SATOSHIS_TXT"))
                 canvas.drawText(text_obj)
 
             canvas.save()
@@ -125,6 +127,7 @@ def create_and_deploy_bitcoin_wallet(base_img_path, bip_gen_mnemonic, in_passphr
     text = addr
     font = ImageFont.truetype(os.getenv("IMGFONT"), 32)
     text_draw.text((110, 129), text, font=font, fill="black", stroke_fill="white", stroke_width=5, align="left")
+    text_draw.text((110, 805), text, font=font, fill="black", stroke_fill="white", stroke_width=5, align="left")
     text_draw.text((1839, 200), in_path + " with passphrase protection", font=font, fill="black", stroke_fill="white",
                    stroke_width=5, align="left")
 
@@ -140,9 +143,9 @@ def main():
     # TODO: Currently only supports btc paper wallets
     if len(sys.argv) == 2: # PWGenerator.py num wallets (0 for test)
         if(sys.argv[1] == '0'):
-            create_paper_wallet(Bip44Coins.BITCOIN, os.getenv("PAPER_WALLET_FRONT_PNG"), 1, os.getenv("PASSPHRASE"), os.getenv("BIP32_BIP43_PATH"), True)
+            create_paper_wallet(Bip44Coins.BITCOIN, os.getenv("PAPER_WALLET_FRONT_PNG"), os.getenv("PAPER_WALLET_BACK_PNG"), 1, os.getenv("PASSPHRASE"), os.getenv("BIP32_BIP43_PATH"), True)
         else:
-            create_paper_wallet(Bip44Coins.BITCOIN, os.getenv("PAPER_WALLET_FRONT_PNG"), int(sys.argv[1]), os.getenv("PASSPHRASE"), os.getenv("BIP32_BIP43_PATH"))
+            create_paper_wallet(Bip44Coins.BITCOIN, os.getenv("PAPER_WALLET_FRONT_PNG"), os.getenv("PAPER_WALLET_BACK_PNG"), int(sys.argv[1]), os.getenv("PASSPHRASE"), os.getenv("BIP32_BIP43_PATH"))
 
 if __name__ == '__main__':
     main()
